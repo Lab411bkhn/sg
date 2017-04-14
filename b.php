@@ -2,9 +2,9 @@
 	require 'dbconnect.php';
 	//$type = $_POST['typeCommand'];
 	$myObj = new stdClass();
-	$sql = "SELECT * FROM cdata";
+	$sql = "DELETE FROM object_predicted";
 	$result = mysql_query($sql) or die(" Error in Selecting ");
-	$sensor = array();
+	/*$sensor = array();
 	while($row = mysql_fetch_array($result))
 	{ 
 		$sensor[] = array(
@@ -14,6 +14,6 @@
 					'status' => $row['status']
 				);
 	}
-	die (json_encode($sensor));
+	die (json_encode($sensor));*/
 ?>
 	

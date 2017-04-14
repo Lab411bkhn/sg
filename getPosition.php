@@ -37,6 +37,22 @@ if(isset($_GET['table'])){
 		die (json_encode($sensor));
 		//mysql_query("DELETE FROM object");
 	}
+	else if ($table === 'object_predicted'){
+		$sql = "SELECT * FROM object_predicted";
+		$result = mysql_query($sql) or die(" Error in Selecting ");	
+		$myObj = new stdClass();
+		$sensor = array();
+		while($row = mysql_fetch_array($result))
+		{ 
+			$sensor[] = array(
+						'time' => $row['time'],
+						'lat' => $row['lat'],
+						'lng' => $row['lng']
+					);
+		}
+		die (json_encode($sensor));
+		//mysql_query("DELETE FROM object");
+	}
 }
 ?>
 	

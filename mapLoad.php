@@ -6,14 +6,14 @@
 </head>
 
 <body onLoad="loadmap()">
-	<input onclick="clearMarkers();" type=button value="Hide Markers">
-    <input onclick="showMarkers();" type=button value="Show All Markers">
-    <input onclick="deleteMarkers();" type=button value="Delete Markers">
-    <input onclick="updatePosUBU();" type=button value="Update Ubu">
+	<input onClick="clearMarkers();" type=button value="Hide Markers">
+    <input onClick="showMarkers();" type=button value="Show All Markers">
+    <input onClick="deleteMarkers();" type=button value="Delete Markers">
+    <input onClick="updatePosUBU();" type=button value="Update Ubu">
     <div id="div_map" style="height:500px; "></div>
     <div id="div_chart" style="height:200px;"></div>
     <div id="div_chart_month" style="height:200px;"></div> 
-    <button onclick="drawChartMonth();drawChart();"> Draw</button>
+    <button onClick="drawChartMonth();drawChart();"> Draw</button>
 </body>
 
 </html>

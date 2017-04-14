@@ -266,7 +266,9 @@ if(strpos($result, "#PS:") !== false){ //#PS:MMNNNNVVVVVVVVVVKKKKKKKKKK
     	$mac = substr($result,4,2);
      	$bantin= $bantin."<b>Node số '".$mac."' đã vào trạng thái ngủ.</b><br>";     	
 	}
-
+else {
+$bantin = $bantin."Ban tin khong xac dinh: ".$result."<br>";	
+}
 
 
 $member = array('bc' => $bc

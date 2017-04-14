@@ -21,7 +21,6 @@ $(document).ready(function(){
 	    echo $highest_id;
 	?>';
 	setInterval(function() { 
-					
 		updatePosUBU();
 		$.get("test.php",function(data){
 			if(data > IdCmd){
@@ -523,7 +522,7 @@ $(document).ready(function(){
         <input onclick="showMarkers();" type=button value="Show All Markers" class="button buttonLan">
         <input onclick="deleteMarkers();" type=button value="Delete Markers" class="button buttonLan">
         <button onclick="stopObject('07')" class="button buttonLan">Clear Object</button>
-        <input onclick="updateSensor();" type=button value="Update Sensor" class="button buttonLan">
+        <input onclick="animateCircle(line);" type=button value="Animate Circle" class="button buttonLan">
 </script>
  
 </head> 
@@ -576,14 +575,46 @@ var iconTrucThang = 'https://www.google.com/mapfiles/ms/icons/helicopter.png';
         map.addListener('click', function(event) {
         	//updateSensor();
         });
-		updateSensor();
+		//updateSensor();
 		poly = new google.maps.Polyline({
-          strokeColor: '#000000',
           strokeOpacity: 1.0,
 		  strokeColor: '#FF0000',
           strokeWeight: 3
         });
         poly.setMap(map);
+		/////////////Prediction
+		var lineSymbol = {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 6,
+          strokeColor: '#393'
+        };
+
+		///////////////////////////////tao doi tuong chuyen dong////////////////////////////		  
+		var arrayData = [];
+		$.ajax({
+			url: "getPosition.php",                           
+			type: "GET",
+			async: false,
+			data: "table=object_predicted",
+			success:function(req){ 
+				result = JSON.parse(req);
+				$.each (result, function (key, item){
+					var pos = new google.maps.LatLng(item['lat'],item['lng']);
+					arrayData.push(pos);   
+                });
+			}	
+		});		
+		  /////////////////////////////////////////////////
+		  // Create the polyline and add the symbol to it via the 'icons' property.
+        var line = new google.maps.Polyline({
+			path: arrayData,
+			icons: [{
+				icon: lineSymbol,
+				offset: '100%'
+			  }],
+			map: map
+        });
+		animateCircle(line);
 	}
 	
 	function addMarkerMac(location, mac,status) {
@@ -719,12 +750,14 @@ var iconTrucThang = 'https://www.google.com/mapfiles/ms/icons/helicopter.png';
                 });
 			}	
 		});	
-		$.get("getPosition.php","table=object",
-				function(data){
-						result = JSON.parse(data);
-						$.each (result, function (key, item){
-							detectedObject(item['mac']);
-						});
+		$.get("getPosition.php","table=object",function(data){
+			result = JSON.parse(data);
+			var count = 0;
+			$.each (result, function (key, item){
+				count += 1;
+				detectedObject(item['mac']);
+			});
+			//if (count > 1) alert ("Thực hiện nội suy");
 		});
 	}
 	
@@ -830,6 +863,16 @@ var iconTrucThang = 'https://www.google.com/mapfiles/ms/icons/helicopter.png';
 			updateSensor();
 		}
 	}
+	
+	function animateCircle(line) {
+          var count = 0;
+          window.setInterval(function() {
+            count = (count + 1) % 200;
+            var icons = line.get('icons');
+            icons[0].offset = (count / 2) + '%';
+            line.set('icons', icons);
+        }, 40);
+      }
 </script> 
 <?php
 	function getTempAvgDay($dd,$ss,$va) //lay nhiet do trung binh ngay
