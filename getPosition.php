@@ -38,7 +38,7 @@ if(isset($_GET['table'])){
 		//mysql_query("DELETE FROM object");
 	}
 	else if ($table === 'object_predicted'){
-		$sql = "SELECT * FROM object_predicted";
+		$sql = "SELECT * FROM object_predicted  ORDER BY time";
 		$result = mysql_query($sql) or die(" Error in Selecting ");	
 		$myObj = new stdClass();
 		$sensor = array();

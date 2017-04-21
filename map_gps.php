@@ -556,6 +556,7 @@ var iconSensorSleep = 'http://www.google.com/mapfiles/ms/micons/lightblue.png';
 var iconSensorSleep1 = 'http://www.google.com/mapfiles/ms/micons/blue.png';
 var iconOBU =   'https://www.google.com/mapfiles/ms/micons/truck.png';
 var iconTrucThang = 'https://www.google.com/mapfiles/ms/icons/helicopter.png';
+var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
  var markers = [];
  var ubuMarkers = [];
  var ubu;
@@ -584,8 +585,9 @@ var iconTrucThang = 'https://www.google.com/mapfiles/ms/icons/helicopter.png';
         poly.setMap(map);
 		/////////////Prediction
 		var lineSymbol = {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 6,
+          //path: google.maps.SymbolPath.CIRCLE,
+		  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 5,
           strokeColor: '#393'
         };
 
@@ -704,13 +706,13 @@ var iconTrucThang = 'https://www.google.com/mapfiles/ms/icons/helicopter.png';
 		markers = [];
 	}	
 	
-	function detectedObject(mac){
+	function detectedObject(mac,time){
 		for (var i = 0; i < markers.length; i++) {
 			if(markers[i]["mac"] == mac){
 				var marker = markers[i]["mark"];
 				marker.setAnimation(google.maps.Animation.BOUNCE);
 				var infowindow = new google.maps.InfoWindow({
-          			content: 'Phát hiện xâm nhập tại node ' + mac
+          			content: 'Phát hiện xâm nhập tại node ' + mac+'lúc ' + time
         		});
 				infowindow.open(map, marker);
 				setTimeout(function(){  marker.setAnimation(null); }, 5000);
@@ -755,7 +757,7 @@ var iconTrucThang = 'https://www.google.com/mapfiles/ms/icons/helicopter.png';
 			var count = 0;
 			$.each (result, function (key, item){
 				count += 1;
-				detectedObject(item['mac']);
+				detectedObject(item['mac'],item['time']);
 			});
 			//if (count > 1) alert ("Thực hiện nội suy");
 		});
