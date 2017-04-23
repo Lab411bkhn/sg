@@ -54,6 +54,18 @@ if(isset($_GET['mac']) && $_GET['type']) {
 		else return 0;
 	}
 	
+	function getTempAvgOneDay($dateTemp,$sensor,$value) //lay nhiet do trung binh ngay
+	{
+		$myquerry = "SELECT AVG(".$value.") FROM data_sensor WHERE mac='".$sensor."' AND time LIKE '".$dateTemp."%'";
+		$query = mysql_query($myquerry);
+		if($query === FALSE) { 
+			die(mysql_error()); // TODO: better error handling
+		}
+		$row = mysql_fetch_array($query);
+		if( $row[0] != NULL) return (double)$row[0];
+		else return 0;
+	}
+	
 	if($type == 'day'){
 		$numDay = 12;
 		$column = array();
@@ -87,6 +99,28 @@ if(isset($_GET['mac']) && $_GET['type']) {
 			);	
 		}
 		die (json_encode($column));
+	}
+	
+	if(isset($_GET['date']) && $_GET['begin'] && $_GET['end']){
+		if ($type == 'avgDay')
+		{
+			$date = $_GET['date'];  //năm-thang-ngày
+			$begin = (int)$_GET['begin'];
+			$end = $_GET['end'];
+			$column = array();
+			for($i = $begin; $i<=$end; $i++) {
+				if($i < 10) $i_temp = '0'.$i;
+				else $i_temp = $i;
+				$dateGet = $date.'-'.$i_temp;
+				$column[] = array(
+						'day' => $i_temp,
+						'temp' => getTempAvgOneDay($dateGet,$mac,'temp'),
+						'humi' => getTempAvgOneDay($dateGet,$mac,'humi'),
+						'ener' => getTempAvgOneDay($dateGet,$mac,'ener')
+				);	
+			}
+			die (json_encode($column));
+		}
 	}
 }
 

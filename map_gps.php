@@ -521,14 +521,12 @@ $(document).ready(function(){
         <input onclick="clearMarkers();" type=button value="Hide Markers" class="button buttonLan">
         <input onclick="showMarkers();" type=button value="Show All Markers" class="button buttonLan">
         <input onclick="deleteMarkers();" type=button value="Delete Markers" class="button buttonLan">
-        <button onclick="stopObject('07')" class="button buttonLan">Clear Object</button>
-        <input onclick="animateCircle(line);" type=button value="Animate Circle" class="button buttonLan">
 </script>
  
 </head> 
 <body onLoad="loadmap()">
-    <div id="div_unallocated_sensor" style="height:30px; ">
-    </div>
+    <div id="div_unallocated_sensor" style="height:30px; "> </div>
+    <div id="div_speed" style="height:20px; "> Toc do: </div>
     <div id="div_map" style="height:500px; "></div>
     <div id="div_chart" style="height:200px;"></div>
     <div id="div_chart_month" style="height:200px;"></div> 
@@ -585,10 +583,10 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
         poly.setMap(map);
 		/////////////Prediction
 		var lineSymbol = {
-          //path: google.maps.SymbolPath.CIRCLE,
-		  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-          scale: 5,
-          strokeColor: '#393'
+			//path: google.maps.SymbolPath.CIRCLE,
+			path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+			scale: 5,
+			strokeColor: '#393'
         };
 
 		///////////////////////////////tao doi tuong chuyen dong////////////////////////////		  
@@ -711,6 +709,19 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 			if(markers[i]["mac"] == mac){
 				var marker = markers[i]["mark"];
 				marker.setAnimation(google.maps.Animation.BOUNCE);
+				/*$.ajax({	//hien thi anh khi phat hien xam nhap
+					url: "jsonSensor.php",                           
+					type: "GET",
+					async: false,
+					data: "mac=" + mac,
+					success:function(req){ 
+						var infowindow = new google.maps.InfoWindow({
+							content: 'Phát hiện xâm nhập tại node ' + mac+'lúc ' + time + '<br>'+req
+						});
+						infowindow.open(map, marker);
+						setTimeout(function(){  marker.setAnimation(null); }, 5000);
+					}	
+				});*/
 				var infowindow = new google.maps.InfoWindow({
           			content: 'Phát hiện xâm nhập tại node ' + mac+'lúc ' + time
         		});
@@ -867,14 +878,19 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 	}
 	
 	function animateCircle(line) {
-          var count = 0;
-          window.setInterval(function() {
+         var count = 0;
+         window.setInterval(function() {
             count = (count + 1) % 200;
             var icons = line.get('icons');
             icons[0].offset = (count / 2) + '%';
+			/*var infowind = new google.maps.InfoWindow({
+          			content: 'duong'
+        		});
+			infowind.open(icons[0]);*/
+			document.getElementById('div_speed').innerHTML = 'Speed: ' + count + 'm/s';
             line.set('icons', icons);
-        }, 40);
-      }
+        }, 200);
+	}
 </script> 
 <?php
 	function getTempAvgDay($dd,$ss,$va) //lay nhiet do trung binh ngay

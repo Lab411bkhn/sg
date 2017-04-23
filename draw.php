@@ -198,6 +198,7 @@ $(document).ready(function(){
                  <td><b>Chọn Sensor:</b></td>
                  <td><select id="selec" name="macSensorBC">
                      <option>---Chọn Sensor---</option>
+                     <option value="04">Sensor 04</option>
                      <option value="31">Sensor 31</option>
                      <option value="32">Sensor 32</option>
                      <option value="33">Sensor 33</option>
@@ -251,7 +252,7 @@ $(document).ready(function(){
 					for($i = 1; $i < 7; $i++)
 					{
 						echo "<option value='".$i."'> Van ".$i."</option>";
-						}
+					}
                     ?>
                     </select>
                 </td>
@@ -265,90 +266,89 @@ $(document).ready(function(){
            </form>
            </div>
            <div style="clear:both"></div>
-           <?php
-		 function getDataSensorR($date,$sensor,$val)
-		 {
-			$result = 0;
-			$sql = "SELECT * FROM data_avg WHERE date LIKE '".$date."%' and sensor='".$sensor."'";
-			$query = mysql_query($sql);
-			$row = mysql_fetch_array($query);
-			if($row != 0)
-			{
-				$result = $row[$val];
+        <?php
+		function getDataSensorR($yearMonth,$sensor,$value)
+		{
+			$myquerry = "SELECT AVG(".$value.") FROM data_sensor WHERE time LIKE '".$yearMonth."%' and mac='".$sensor."'";
+			$query = mysql_query($myquerry);
+			if($query === FALSE) { 
+				die(mysql_error()); // TODO: better error handling
 			}
-			return $result;
+			$row = mysql_fetch_array($query);
+			if( $row[0] != NULL) return (double)$row[0];
+			else return 0;
 		}
-		 function getDataSensorRBC($date,$sensor,$val)
-		  {			  
-			  $avg_val = 0;
-			  $cnt_val = 0;
-			  $sql = "SELECT * FROM data_avg WHERE date LIKE '".$date."%' and sensor='".$sensor."'";
-			  $query = mysql_query($sql);
-			  while ($row = mysql_fetch_array($query)){
-				  $avg_val += $row[$val];
-				  $cnt_val += 1;
-			  }
-			  if ($cnt_val > 0) return ($avg_val/$cnt_val); 
-			  else return 0;
+		
+		function getDataSensorRBC($yearMonth,$sensor,$value)
+		{			  
+			$myquerry = "SELECT AVG(".$value.") FROM data_sensor WHERE time LIKE '".$yearMonth."%' and mac='".$sensor."'";
+			$query = mysql_query($myquerry);
+			if($query === FALSE) { 
+				die(mysql_error()); // TODO: better error handling
+			}
+			$row = mysql_fetch_array($query);
+			if( $row[0] != NULL) return (double)$row[0];
+			else return 0;
 		}
-          if(isset($_POST['btDraw']))
-		  {
-			  //Ve bieu do 1 ngay
-			  if($_POST['rdngayve'] == 'oneday')
-			  {
-			  $date_ = $_POST['DrawDay'];
-              $ngay1= substr($date_,8,2);
-              $thang1= substr($date_,5,2);
-              $nam1= substr($date_,0,4);
-              $ngaythangnam=$nam1."-".$thang1."-".$ngay1;
-			  //ve bieu do 1 ngay khu vuon lan
-			  if ($_POST['rdKhuVuc']== 'Lan')
-			  {
-		  ?>
-           <script language="javascript">
-          //Ve do thi 
-				google.load("visualization", "1", {packages:["corechart"]});
-      			google.setOnLoadCallback(drawChart);
-      			function drawChart() {
-					var data = google.visualization.arrayToDataTable([
-						['Sensor','Nhiệt độ (ºC)','Độ ẩm (%)','Năng lượng (V)']
-						<?php
-						for($i = 1; $i < 13; $i++)
-						{
-							$mac = dechex($i);
-							$mac = '0'.strtoupper($mac);
-							echo ",['".$mac."',".getDataSensorR($ngaythangnam,$mac,"temp").",".getDataSensorR($ngaythangnam,$mac,"humi").",".getDataSensorR($ngaythangnam,$mac,"power")."]";
-						}
-					?>
-					]);
-				var options = {
-				  title: 'Dữ liệu sensor vườn lan ngày <?php echo $ngaythangnam;?>',
-				  hAxis: {title: 'Sensor vườn lan', titleTextStyle: {color: 'red'}}
-				};
-				var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-				chart.draw(data, options);
-			  }
-	  </script>
-           <div id="chart_div" style="width:auto; height: 600px;"></div>
-           <?php
-			  }
-			  //Ket thuc ve bieu do lan 1 ngay
-			  
-			  //ve bieu do 1 ngay khu bao chay
-			  else
-			  {
-		  ?>
+		///////////////////////////////////////Xu ly button//////////////////////////////////////
+		if(isset($_POST['btDraw']))
+		{
+			//Ve bieu do 1 ngay
+			if($_POST['rdngayve'] == 'oneday')
+			{
+				$date_ = $_POST['DrawDay'];
+				$ngay1= substr($date_,8,2);
+				$thang1= substr($date_,5,2);
+				$nam1= substr($date_,0,4);
+				$ngaythangnam=$nam1."-".$thang1."-".$ngay1;
+				//ve bieu do 1 ngay khu vuon lan
+				if ($_POST['rdKhuVuc']== 'Lan')
+				{
+		?>
+           		<script language="javascript">
+          		//Ve do thi 
+					google.load("visualization", "1", {packages:["corechart"]});
+					google.setOnLoadCallback(drawChart);
+					function drawChart() {						
+						var data = google.visualization.arrayToDataTable([
+							['Sensor','Nhiệt độ (ºC)','Độ ẩm (%)','Năng lượng (V)']
+							<?php
+							for($i = 1; $i < 13; $i++)
+							{
+								$mac = dechex($i);
+								$mac = '0'.strtoupper($mac);
+								echo ",['".$mac."',".getDataSensorR($ngaythangnam,$mac,'temp').",".getDataSensorR($ngaythangnam,$mac,'humi').",".getDataSensorR($ngaythangnam,$mac,'ener')."]";
+							}
+						?>
+						]);
+						var options = {
+						  title: 'Dữ liệu sensor vườn lan ngày <?php echo $ngaythangnam;?>',
+						  hAxis: {title: 'Sensor vườn lan', titleTextStyle: {color: 'red'}}
+						};
+						var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+						chart.draw(data, options);
+					}
+				</script>
+        <div id="chart_div" style="width:auto; height: 600px;"></div>
+        <?php
+				}
+				//Ket thuc ve bieu do lan 1 ngay
+				//ve bieu do 1 ngay khu bao chay
+				else
+				{
+        ?>
            <script language="javascript">
           //Ve do thi 
 			google.load("visualization", "1", {packages:["corechart"]});
 			google.setOnLoadCallback(drawChart);
 			function drawChart() {
+				alert("ok");
         		var data = google.visualization.arrayToDataTable([
           		['Sensor','Nhiệt độ (ºC)','Độ ẩm (%)','Năng lượng (V)'],
 					<?php
 					for($i = 31; $i < 40; $i++)
 					{
-						echo "['".$i."',".getDataSensorRBC($ngaythangnam,$i,"temp").",".getDataSensorRBC($ngaythangnam,$i,"humi").",".getDataSensorRBC($ngaythangnam,$i,"power")."],";
+						echo "['".$i."',".getDataSensorRBC($ngaythangnam,$i,'temp').",".getDataSensorRBC($ngaythangnam,$i,'humi').",".getDataSensorRBC($ngaythangnam,$i,'ener')."],";
 					}
 					?>
         		]);
@@ -383,23 +383,26 @@ $(document).ready(function(){
 				google.load("visualization", "1", {packages:["corechart"]});
       			google.setOnLoadCallback(drawChart);
       			function drawChart() {
-        		var data = google.visualization.arrayToDataTable([
-          		['Sensor','Nhiệt độ (ºC)','Độ ẩm (%)','Năng lượng (V)'],
-				<?php
-				for($i = $begin;$i <= $end;$i++)
-				{
-					$ngay = $i."-".$month."-".$year;
-					echo "['".$i."',".getDataSensorR($ngay,$sensor,"temp").",".getDataSensorR($ngay,$sensor,"humi").",".getDataSensorR($ngay,$sensor,"power")."],";
-					}
-				?>
-        		]);
-
-        var options = {
-          title: 'Dữ liệu sensor <?php echo $sensor; ?> từ ngày <?php echo $begin; ?> đến ngày <?php echo $end; ?> tháng <?php echo $month; ?> năm <?php echo $year; ?>',
-          hAxis: {title: 'Sensor vườn lan', titleTextStyle: {color: 'red'}}
-        };
-        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
+				$.ajax({
+					url: "drawChart.php",                           
+					type: "GET",
+					async: false,
+					data: "mac=<?php echo $sensor?>&type=avgDay&begin=<?php echo $begin?>&end=<?php echo $end?>&date=<?php echo $year."-".$month?>",
+					success:function(req){ 
+						result = JSON.parse(req);
+						var arrayData = [['Ngày','Nhiệt độ (ºC)','Độ ẩm (%)','Năng lượng (V)']];
+						$.each (result, function (key, item){
+							arrayData.push([item['day'],item['temp'],item['humi'],item['ener']]);   
+		                });
+						var data = google.visualization.arrayToDataTable(arrayData);
+						var options = {
+							title: 'Dữ liệu sensor <?php echo $sensor; ?> từ ngày <?php echo $begin; ?> đến ngày <?php echo $end; ?> tháng <?php echo $month; ?> năm <?php echo $year; ?>',
+							hAxis: {title: 'Sensor vườn lan', titleTextStyle: {color: 'red'}}
+						};
+						var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+						chart.draw(data, options);
+					}	
+				});		
       }
 	  </script>
            <div id="chart_div" style="width:auto; height: 600px;"></div>
@@ -413,33 +416,36 @@ $(document).ready(function(){
            <script language="javascript">
           //Ve do thi 
 				google.load("visualization", "1", {packages:["corechart"]});
-      			google.setOnLoadCallback(drawChart);
-      			function drawChart() {
-        		var data = google.visualization.arrayToDataTable([
-          		['Sensor','Nhiệt độ (ºC)','Độ ẩm (%)','Năng lượng (V)'],
-				<?php
-				for($i = $begin;$i <= $end;$i++)
-				{
-					$ngay = $i."-".$month."-".$year;
-					echo "['".$i."',".getDataSensorRBC($ngay,$sensor,"temp").",".getDataSensorRBC($ngay,$sensor,"humi").",".getDataSensorRBC($ngay,$sensor,"power")."],";
-					}
-				?>
-        		]);
-
-        var options = {
-          title: 'Dữ liệu sensor <?php echo $sensor; ?> từ ngày <?php echo $begin; ?> đến ngày <?php echo $end; ?> tháng <?php echo $month; ?> năm <?php echo $year; ?>',
-          hAxis: {title: 'Sensor vườn lan', titleTextStyle: {color: 'red'}}
-        };
-        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-      }
-	  </script>
-           <div id="chart_div" style="width:auto; height: 600px;"></div>
-           <?php
+				google.setOnLoadCallback(drawChart);
+				function drawChart() {
+					$.ajax({
+						url: "drawChart.php",                           
+						type: "GET",
+						async: false,
+						data: "mac=<?php echo $sensor?>&type=avgDay&begin=<?php echo $begin?>&end=<?php echo $end?>&date=<?php echo $year."-".$month?>",
+						success:function(req){ 
+							result = JSON.parse(req);
+							var arrayData = [['Ngày','Nhiệt độ (ºC)','Độ ẩm (%)','Năng lượng (V)']];
+							$.each (result, function (key, item){
+								arrayData.push([item['day'],item['temp'],item['humi'],item['ener']]);   
+			                });
+							var data = google.visualization.arrayToDataTable(arrayData);
+							var options = {
+								title: 'Dữ liệu sensor <?php echo $sensor; ?> từ ngày <?php echo $begin; ?> đến ngày <?php echo $end; ?> tháng <?php echo $month; ?> năm <?php echo $year; ?>',
+								hAxis: {title: 'Sensor báo cháy', titleTextStyle: {color: 'red'}}
+							};
+							var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+							chart.draw(data, options);
+						}	
+					});							
+				}
+			</script>
+            <div id="chart_div" style="width:auto; height: 600px;"></div>
+            <?php
 					  
-					  }
-				  }
-		 } 
+			}
+		}
+	} 
 		 ?>
            
          </div>
