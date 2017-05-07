@@ -1,5 +1,5 @@
 <?php 
-require 'dbconnect.php';
+require '../dbconnect.php';
 if(isset($_GET['type'])){
 	$type = $_GET['type'];
 	$time = $_GET['time'];
@@ -128,8 +128,8 @@ if(isset($_GET['type'])){
 		function getMacDetectedObject($lat,$lng){
 			$getSensor = mysql_query("SELECT * FROM cdata");
 			while($row = mysql_fetch_array($getSensor)){
-				if(abs($lat - $row['lat']) < 0.0002){
-					if(abs($lng - $row['lng']) < 0.0002){
+				if(abs($lat - $row['lat']) < 0.0001){
+					if(abs($lng - $row['lng']) < 0.0001){
 						return $row['mac'];
 					}					
 				}
@@ -153,6 +153,38 @@ if(isset($_GET['type'])){
 			}
 		}
 
+		function makeCommandToTakePhoto($dataArray){
+			$macTime = getMacTimeRequestObject();
+			$sql0="SELECT MAX(time) FROM object";
+			$query0 = mysql_query($sql0);
+			while($row0 = mysql_fetch_array($query0)){
+				$time0 = $row0[0];
+			}	
+			$timeTemp = split("\:",$time0);
+			$tem1 = (int)($macTime['time']/3600);
+			$tem2 = (int)(($macTime['time'] - $tem1*3600)/60);
+			$timeTemp[0] = (int)(($timeTemp[0] + $tem1)%24);
+			$timeTemp[1] = (int)$timeTemp[1] + $tem2;
+			$timeTemp[2] = (int)$timeTemp[2] + $macTime['time'] - $tem1*3600 - $tem2*60;
+			if($timeTemp[1]>59) {
+				$timeTemp[1] = $timeTemp[1]-60;	
+				$timeTemp[0] += 1;
+			}
+			if($timeTemp[2]>59) {
+				$timeTemp[2] = $timeTemp[2]-60;	
+				$timeTemp[1] += 1;
+			}
+			$timeDoCommand = $timeTemp[0].":".$timeTemp[1].":".$timeTemp[2];
+			$sql="SELECT netip FROM cdata WHERE mac='".$macTime['mac']."'";
+			$query = mysql_query($sql);
+			while($row = mysql_fetch_array($query)){
+				$network_ip = $row['netip'];
+				$speed = interpolationSpeedOneDirect($dataArray,$macTime['time']);
+				$command = "#P:".$network_ip."-".$macTime['time']."-".$speed;
+				mysql_query("insert into command values ('".$command."')");
+				echo "Successful";
+			}			
+		}
 	/////////////////////////handle request////////////////////
 	if($type == 'position'){	
 		interpolation10points($sensor,100);
@@ -161,10 +193,11 @@ if(isset($_GET['type'])){
 		$lat = 21.004806;
 		$lng =  105.844116;
 		//if(getMacDetectedObject($lat,$lng) === NULL) echo "duong";
-		print_r(getMacTimeRequestObject());
+		//print_r(getMacTimeRequestObject());
+		makeCommandToTakePhoto($sensor);
 	}
 	else if($type == 'speed'){
-		echo ( interpolationSpeedOneDirect($sensor,$time));
+		echo (interpolationSpeedOneDirect($sensor,$time));
 	}
 	else if($type == 'getData'){
 		$speed = interpolationSpeedOneDirect($sensor,$time);

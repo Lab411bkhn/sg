@@ -1,19 +1,14 @@
-<?php 
-	require 'dbconnect.php';
-	//$type = $_POST['typeCommand'];
-	$myObj = new stdClass();
-	$sql = "DELETE FROM object_predicted";
-	$result = mysql_query($sql) or die(" Error in Selecting ");
-	/*$sensor = array();
-	while($row = mysql_fetch_array($result))
-	{ 
-		$sensor[] = array(
-					'mac' => $row['mac'],
-					'lat' => $row['lat'],
-					'lng' => $row['lng'],
-					'status' => $row['status']
-				);
-	}
-	die (json_encode($sensor));*/
+<?php
+$xml = new SimpleXMLElement('<xml/>');
+
+for ($i = 1; $i <= 8; ++$i) {
+    $node = $xml->addChild('node');
+    $node->addChild('mac', "$i");
+    $node->addChild('time', "14:3".$i.":00");
+    $node->addChild('lat', "027.32156".$i);	
+    $node->addChild('lng', "107.32156".$i);
+}
+
+Header('Content-type: text/xml');
+print($xml->asXML());
 ?>
-	

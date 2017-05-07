@@ -1,8 +1,11 @@
-<?php
-require 'dbconnect.php';
-$query = mysql_query("DELETE FROM data_sensor WHERE temp like '-%' or humi like '-%' or ener like '-%'");
-	   if($query === FALSE) { 
-			die(mysql_error()); // TODO: better error handling
-		}
-		else echo "OK"
-?>
+<html>
+<body>
+	<script type="text/javascript" src = "jquery.js"></script>
+</body>
+</html>
+<script>
+var time =12;
+$.get("tools/interpolation.php","type=speed&time="+time,function(data){
+	alert(data);
+});
+</script>

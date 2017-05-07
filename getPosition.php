@@ -19,7 +19,7 @@ if(isset($_GET['table'])){
 		die (json_encode($sensor));
 	}
 	else if ($table === 'object'){
-		$sql = "SELECT * FROM object";
+		$sql = "SELECT * FROM object ORDER BY time";
 		$result = mysql_query($sql) or die(" Error in Selecting ");	
 		$myObj = new stdClass();
 		$sensor = array();

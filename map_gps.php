@@ -526,7 +526,7 @@ $(document).ready(function(){
 </head> 
 <body onLoad="loadmap()">
     <div id="div_unallocated_sensor" style="height:30px; "> </div>
-    <div id="div_speed" style="height:20px; "> Toc do: </div>
+    <div id="div_speed" style="height:40px; "> Toc do: </div>
     <div id="div_map" style="height:500px; "></div>
     <div id="div_chart" style="height:200px;"></div>
     <div id="div_chart_month" style="height:200px;"></div> 
@@ -588,7 +588,26 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 			scale: 5,
 			strokeColor: '#393'
         };
-
+		
+		var arrayDataObject = []; //cac toa do da phat hien xam nhap
+		$.ajax({
+			url: "getPosition.php",                           
+			type: "GET",
+			async: false,
+			data: "table=object",
+			success:function(req){ 
+				result = JSON.parse(req);
+				$.each (result, function (key, item){
+					var pos = new google.maps.LatLng(item['lat'],item['lng']);
+					arrayDataObject.push(pos);   
+                });
+				var line = new google.maps.Polyline({
+							path: arrayDataObject,
+		  					strokeColor: '#FF0000',
+							map: map
+				});
+			}	
+		});		
 		///////////////////////////////tao doi tuong chuyen dong////////////////////////////		  
 		var arrayData = [];
 		$.ajax({
@@ -608,6 +627,7 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 		  // Create the polyline and add the symbol to it via the 'icons' property.
         var line = new google.maps.Polyline({
 			path: arrayData,
+		  	strokeColor: 'blue',
 			icons: [{
 				icon: lineSymbol,
 				offset: '100%'
@@ -880,16 +900,23 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 	function animateCircle(line) {
          var count = 0;
          window.setInterval(function() {
-            count = (count + 1) % 200;
+            count = (count + 1);
             var icons = line.get('icons');
-            icons[0].offset = (count / 2) + '%';
+            //icons[0].offset = (count / 2) + '%';
 			/*var infowind = new google.maps.InfoWindow({
           			content: 'duong'
         		});
 			infowind.open(icons[0]);*/
-			document.getElementById('div_speed').innerHTML = 'Speed: ' + count + 'm/s';
+			var time = count*0.3;	
+			$.get("tools/interpolation.php","type=getData&time="+time,function(data){
+				result = JSON.parse(data);
+				//alert(data);
+				document.getElementById('div_speed').innerHTML = 'Đối tượng xâm nhập Speed: ' + result.speed.toString().substring(0,5) + 'm/s <br> Kinh độ: ' + result.lat.toString().substring(0,9) + ' - Vĩ độ: '+result.lng.toString().substring(0,10);
+            	icons[0].offset = result.percent + '%';
+				//if(result.macDetected == -1) alert("Duong");
+			});
             line.set('icons', icons);
-        }, 200);
+        }, 300);
 	}
 </script> 
 <?php
