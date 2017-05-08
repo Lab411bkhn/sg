@@ -26,6 +26,8 @@ $(document).ready(function(){
 			if(data > IdCmd){
 				updateSensor();
 				IdCmd = data;
+				//history.go(0)
+				loadmap();				
 			}
 		});
 	}, 600);		
@@ -574,7 +576,7 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
         map.addListener('click', function(event) {
         	//updateSensor();
         });
-		//updateSensor();
+		updateSensor();
 		poly = new google.maps.Polyline({
           strokeOpacity: 1.0,
 		  strokeColor: '#FF0000',

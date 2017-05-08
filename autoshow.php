@@ -26,7 +26,7 @@ while( $row1 = mysql_fetch_array($query1)){
 		else
 			$bc = 1;
 		}
-	if(strpos ($result,"#F") !== false)
+	else if(strpos ($result,"#F") !== false)
 	{
 		$len = strlen($result) - 1;
 		$time = substr($result,2,$len);
@@ -41,7 +41,7 @@ while( $row1 = mysql_fetch_array($query1)){
 		}
 		$bc = 1;
 		}
-	if(strpos ($result,"#T") !== false)
+	else if(strpos ($result,"#T") !== false)
 	{
 		$len = strlen($result) - 1;
 		$time = substr($result,2,$len);
@@ -55,7 +55,7 @@ while( $row1 = mysql_fetch_array($query1)){
 		}
 		$bc = 0;
 		}
-	if(strpos ($result,"#C") !== false)
+	else if(strpos ($result,"#C") !== false)
 	{
 		$len = strlen($result) - 1;
 		$time = substr($result,3,$len);
@@ -72,7 +72,7 @@ while( $row1 = mysql_fetch_array($query1)){
 		else
 			$bc = 1;
 		}
-	if( strpos ($result,"#RD") !== false){	//#RD:NNNNMMDDDDDDDDEEEE	
+	else if( strpos ($result,"#RD") !== false){	//#RD:NNNNMMDDDDDDDDEEEE	
 		$network_ip= substr($result,4,4);
 		$mac = substr($result,8,2);
 		
@@ -102,7 +102,7 @@ while( $row1 = mysql_fetch_array($query1)){
 		}else $bc = 0;
 	}
 	
-	if( strpos ($result,"#AD") !== false){		
+	else if( strpos ($result,"#AD") !== false){		
 		$network_ip= substr($result,4,4);
 		$mac = substr($result,8,2);
 		
@@ -132,7 +132,7 @@ while( $row1 = mysql_fetch_array($query1)){
 		}else $bc = 0;
 	}
 	
-	if(strpos($result,"#JN:")!==false){
+	else if(strpos($result,"#JN:")!==false){
 		$network_ip = substr ($result,4,4);
 		$mac = substr ($result,8,2);
 		$node_type = substr ($result,10,2);
@@ -146,19 +146,14 @@ while( $row1 = mysql_fetch_array($query1)){
 			
 		}
 		$bantin= $bantin."Địa chỉ MAC : ".$mac."<br />";
-		$bantin= $bantin."Địa chỉ mạng : ".$network_ip."<br />";
-		
-		
+		$bantin= $bantin."Địa chỉ mạng : ".$network_ip."<br />";		
 		if ('29' < $mac && $mac< '40' || $mac =="B1") { 
 			$bc = 1;
 		}else $bc = 0;
 	}
 
 
-	
-	}
-
-if(strpos($result, "#PS:") !== false){ //#PS:MMNNNNVVVVVVVVVVKKKKKKKKKK
+	else if(strpos($result, "#PS:") !== false){ //#PS:MMNNNNVVVVVVVVVVKKKKKKKKKK
 		$mac = substr($result,4,2); //MM
 		$network_ip = substr($result,6,4);
 		$VD = substr($result,10,10);	//Vi do
@@ -175,29 +170,23 @@ if(strpos($result, "#PS:") !== false){ //#PS:MMNNNNVVVVVVVVVVKKKKKKKKKK
 		}else $bc = 0;
 	}
 
-
-	if (strpos($result, "#RC") !== false){ // #RI:NNNNMMD1D2D3D4 D5D6D7D8..... 
+	else if (strpos($result, "#RC") !== false){ // #RI:NNNNMMD1D2D3D4 D5D6D7D8..... 
 		$network_ip = substr($result, 4, 4);//NNNN
 		$mac = substr($result, 8, 2);//MM
 		$data = substr($result, 10); // D1D2D3D4D5D6D7D8......
-		
-		
-		
 		if("01"<=$mac && $mac < "A0"){
-		$bantin = $bantin."<b> Bản tin yêu cầu hiển thị ảnh của sensor ...</b></br>";	
-		$sql2 = "INSERT INTO camera(image, mac) VALUES ('".$data."', '".$mac."')";
-		mysql_query($sql2);		
-		$bantin = $bantin."Du Lieu Anh : ".$data."<br/>";	
+			$bantin = $bantin."<b> Bản tin yêu cầu hiển thị ảnh của sensor ...</b></br>";	
+			$sql2 = "INSERT INTO camera(image, mac) VALUES ('".$data."', '".$mac."')";
+			mysql_query($sql2);		
+			$bantin = $bantin."Du Lieu Anh : ".$data."<br/>";	
 		}
 		if ('29' < $mac && $mac< '40' || $mac =="B1") { 
 			$bc = 1;
-		}else $bc = 0;
 		}
-		
-		
+		else $bc = 0;
+	}
 	
-	
-	if(strpos($result,"SN") !== false){
+	else if(strpos($result,"SN") !== false){
      	$network_ip = substr($result,4,4);
      	$mac = substr($result,8,2);
      	$state_node = substr($result,10,2);
@@ -208,10 +197,10 @@ if(strpos($result, "#PS:") !== false){ //#PS:MMNNNNVVVVVVVVVVKKKKKKKKKK
      	if($state_node == "02"){
      		$bantin= $bantin."Phát hiện cảnh báo cháy tại node: ";     		
 		}
-     	elseif($state_node == "03"){
+     	elseif($state_node == "04"){
      		$bantin= $bantin."Phát hiện xâm nhập tại node: ";
      	}
-		elseif($state_node == "04"){
+		elseif($state_node == "03"){
      		$bantin= $bantin."Phát hiện hết năng lượng tại node: ";
      	}
      	$bantin= $bantin.$mac."<br />";
@@ -222,7 +211,7 @@ if(strpos($result, "#PS:") !== false){ //#PS:MMNNNNVVVVVVVVVVKKKKKKKKKK
 		}else $bc = 0;
 	}	
 	
-	if(strpos($result,"OK") !== false){//#OK:NNNNMM8x,1x
+	else if(strpos($result,"OK") !== false){//#OK:NNNNMM8x,1x
 		$network_ip = substr($result, 4,4);
 		$stt_16 = substr($result, 10,2);	
 		$stt_10 = base_convert($stt_16, 16, 10);
@@ -262,19 +251,21 @@ if(strpos($result, "#PS:") !== false){ //#PS:MMNNNNVVVVVVVVVVKKKKKKKKKK
 		}
 	}
 	
-	if(strpos($result,"VL") !== false){//#SL:MM
+	else if(strpos($result,"VL") !== false){//#SL:MM
+		$bc = 1;
     	$mac = substr($result,4,2);
      	$bantin= $bantin."<b>Node số '".$mac."' đã vào trạng thái ngủ.</b><br>";     	
 	}
-else {
-$bantin = $bantin."Ban tin khong xac dinh: ".$result."<br>";	
+	else {
+		$bc = 1;
+		$bantin = $bantin."Ban tin khong xac dinh: ".$result."<br>";	
+	}
+	
+
+	$member = array('bc' => $bc
+			,'bantin' => $bantin);
+	echo json_encode($member);
+	die;
 }
-
-
-$member = array('bc' => $bc
-		,'bantin' => $bantin);
-echo json_encode($member);
-die;
-
-mysql_close($connect);
+	//mysql_close($connect);
 ?>

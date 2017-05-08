@@ -20,8 +20,6 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 		mysql_query("UPDATE cdata SET netip='0000' WHERE mac='B1'");
 		}
 	else*/
-	$sql2 = "INSERT INTO bantin(bantin) VALUES ('".$result."')";
-	mysql_query($sql2);
 	
 	//$my_query = "INSERT INTO tbSMS_EB(SMS_EB) VALUES ('".$result1."')";
 	//mysql_query ($my_query);
@@ -493,25 +491,59 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),32)";
 				mysql_query ($my_query);
 			}
-			elseif($state_node == "03"){//co phat hien xam nhap
+			elseif($state_node == "04"){//co phat hien xam nhap
 				//$status = "intrusion";
 				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),33)";
 				mysql_query ($my_query);
-				//$sql6 = "SELECT * FROM object WHERE netip = '".$mac."'";
-				//$query6 = mysql_query($sql6);
-				//$row_no = mysql_num_rows($query6);	
-				//if($row_no==0){//
-				//	$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."',now())";
-				//}
-				//else 
-				//$insertObject = "UPDATE object SET object(mac,time) VALUES ('".$mac."','".$network_ip."',now())"; 
-				$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."',now())";
+				$sql6 = "SELECT * FROM object WHERE mac = '".$mac."'";
+				$query6 = mysql_query($sql6);
+				$row_no = mysql_num_rows($query6);	
+				if($row_no==0){//
+					$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."',now())";
+				}
+				else {
+					$insertObject = "UPDATE object SET time=now() WHERE mac = '".$mac."'"; 	
+				}
+				//$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."',now())";
 				mysql_query ($insertObject);
 			}
-			elseif($state_node == "04"){//het nang luong
+			else if($state_node == "03"){//het nang luong
 				//$status = "energy";
 				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),34)";
 				mysql_query ($my_query);
+			}
+			else if($state_node == "06"){//phat hien doi tuong tu anh chup #SN:NNNNMM05hhmmss
+				$hourDetected = substr($result,12,2);
+				$minDetected = substr($result,14,2);
+				$secondDetected = substr($result,16,2);
+				$timeDetected = $hourDetected.":".$minDetected.":".$secondDetected;
+				echo "HD:".$timeDetected;
+				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),33)";
+				mysql_query ($my_query);
+				$sql6 = "SELECT * FROM object WHERE mac = '".$mac."'";
+				$query6 = mysql_query($sql6);
+				$row_no = mysql_num_rows($query6);	
+				if($row_no==0){//
+					$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."','".$timeDetected."')";
+				}
+				else {
+					$insertObject = "UPDATE object SET time='".$timeDetected."' WHERE mac = '".$mac."'"; 	
+				}
+				mysql_query ($insertObject);
+				?>
+                <script type="text/javascript" src = "jquery.js"></script>
+                <script language="javascript">
+					$.ajax({
+						url: "interpolation.php",                           
+						type: "GET",
+						async: false,
+						data: "type=position&time=1",
+						success:function(req){ 
+							//do nothing here
+						}	
+					});		
+				</script>
+                <?php
 			}
 	}
 	
@@ -529,6 +561,9 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 		//$r2 = mysql_fetch_array($q2);	
 		//mysql_query("UPDATE node(src,des,bet) SET ('".$r1['mac']."','".$r2['mac']."','".$r."')");
 	}
+	
+	$sql2 = "INSERT INTO bantin(bantin) VALUES ('".$result."')";
+	mysql_query($sql2);
 	//mysql_close($connect);
 }
 ?>

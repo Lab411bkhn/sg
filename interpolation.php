@@ -2,8 +2,7 @@
 require 'dbconnect.php';
 if(isset($_GET['type'])){
 	$type = $_GET['type'];
-	$time = $_GET['time'];
-	$sql = "SELECT * FROM object";
+	$sql = "SELECT * FROM object ORDER BY time";
 			$result = mysql_query($sql) or die(" Error in Selecting ");	
 			$myObj = new stdClass();
 			$sensor = array();
@@ -31,7 +30,6 @@ if(isset($_GET['type'])){
 		function getDividedDifferences($dataArray,$type){
 			$result = array();
 			$lengthArr = count($dataArray);
-			//$dataA = JSON.parse(JSON.stringify(dataArray));		//copy array json
 			$dataA = $dataArray;
 			
 			//$dataA = array_merge(array(), $dataArray);
@@ -89,8 +87,8 @@ if(isset($_GET['type'])){
 				$lngTem = newtonInterpolation($dataArr,'lng',$timeSampl);
 				$my_query = "INSERT INTO object_predicted(lat, lng, time,speed) VALUE ('".$latTem."', '".$lngTem."', '".$timeSampl."', '0')";	
 				mysql_query($my_query) or die("Error in Selecting ");
-				echo($timeSampl.": Lat: ".$latTem." - Lng: ".$lngTem."<br>");
-			}    		
+			}    
+			echo "success";		
 		}
 		//interpolation10points($sensor,10);
 		
@@ -155,7 +153,7 @@ if(isset($_GET['type'])){
 
 	/////////////////////////handle request////////////////////
 	if($type == 'position'){	
-		interpolation10points($sensor,100);
+		interpolation10points($sensor,80);
 	}
 	else if($type == 'demo'){
 		$lat = 21.004806;
@@ -164,9 +162,11 @@ if(isset($_GET['type'])){
 		print_r(getMacTimeRequestObject());
 	}
 	else if($type == 'speed'){
+		$time = $_GET['time'];
 		echo ( interpolationSpeedOneDirect($sensor,$time));
 	}
 	else if($type == 'getData'){
+		$time = $_GET['time'];
 		$speed = interpolationSpeedOneDirect($sensor,$time);
 		$percent = getPercentPosition($sensor,$time,500);
 		$dataReturn = array(
