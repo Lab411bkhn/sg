@@ -140,15 +140,25 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 		mysql_query($my_query);
 	}
 	
-	if(strpos($result,"RC")!= false){ //#RI:NNNNMMD1D2D3D4D5D6.....
+	if(strpos($result,"RC")!= false){ //#RC:NNNNMMD1D2D3D4D5D6.....
+	?>
+			<script>
+				btnSend_Click();
+                function btnSend_Click() {
+                  var xhttp = new XMLHttpRequest();
+                  //xhttp.open("GET", "http://localhost/sg/rx.php?data=<?php echo "haiduong" ?>", true);
+				  xhttp.open("POST", "http://192.168.0.120/<?php echo "0".$_GET['data']; ?>", true);
+                  xhttp.send(); 
+                }
+            </script>
+        <?php
 		$network_ip = substr($result, 4, 4);// NNNN
 		$mac = substr($result, 8, 2);//MM
+		$timePhoto = substr($result, 10, 6);
 		$nameImgageLatest = $mac.date('Ymdhis'); // Nam thang ngay gio phut giay...
 		$sql4 = "SELECT * FROM cdata WHERE mac = '".$mac."'";
 		$queryig = mysql_query($sql4);
-		$row1 = mysql_num_rows($queryig);
-		
-		
+		$row1 = mysql_num_rows($queryig);	
 		
 		if($row1 = 0 ){ // nếu chưa tồn tại địa chỉ mac thì kiểm tra xem địa chỉ mạng tồn tại hay chưa
 			$sql6 = "SELECT * FROM cdata WHERE netip = '".$network_ip."'";
@@ -168,7 +178,7 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 				mysql_query($my_query4);
 		}
 		////////////////////////////create image////////////////////////////
-		$data = substr($result, 10);
+		$data = substr($result, 16);
 		$binary=pack('H*', str_replace(' ', '', $data));
 		$path = "C:\\xampp\\htdocs\\sg\\imagesensor\\Sensor".$mac."\\";
 		if (!is_dir($path)) mkdir($path); 
@@ -481,7 +491,7 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 			}
 	}
 	
-	if(strpos($result,"SN") !== false){//#SN:NNNNMMSS
+	if(strpos($result,"SN") !== false){//#SN:NNNNMMSS  #SN:00000007
 			$mac = substr ($result,8,2);//MM
 			$network_ip = substr ($result,4,4);//NNNN
 			$state_node = substr($result,10,2);
@@ -511,6 +521,11 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 				//$status = "energy";
 				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),34)";
 				mysql_query ($my_query);
+			}
+			else if($state_node == "07"){//phat hien doi tuong tu camera
+				$command = "00".$network_ip.$mac."1$";
+				mysql_query("insert into command values ('".$command."')");
+				
 			}
 			else if($state_node == "06"){//phat hien doi tuong tu anh chup #SN:NNNNMM05hhmmss
 				$hourDetected = substr($result,12,2);

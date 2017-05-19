@@ -1,24 +1,9 @@
-<?php
-// Create map with request parameters
-$params = array ('data' => 'haiduong');
- 
-// Build Http query using params
-$query = http_build_query ($params);
- 
-// Create Http context details
-$contextData = array ( 
-                'method' => 'GET',
-                'header' => "Connection: close\r\n".
-                            "Content-Length: ".strlen($query)."\r\n",
-                'content'=> $query );
- 
-// Create context resource for our request
-$context = stream_context_create (array ( 'http' => $contextData ));
- 
-// Read page rendered as result of your POST request
-$result =  file_get_contents (
-                  'rx.php',  // page url
-                  false,
-                  $context);
- 
-?>
+<td> <textarea rows="3px" cols="100%" id="textArea" >Data received</textarea> </td>
+<td> <button onClick="btnSend_Click()" id="btnSend" type="button" >Send</button></td>
+<script>
+      	function btnSend_Click(dataSend) {
+      	  var xhttp = new XMLHttpRequest();
+      	  xhttp.open("GET", "http://192.168.0.120/data="+"duong", true);
+      	  xhttp.send(); 
+      	}
+</script>

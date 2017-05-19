@@ -2,7 +2,6 @@
 require '../dbconnect.php';
 if(isset($_GET['type'])){
 	$type = $_GET['type'];
-	$time = $_GET['time'];
 	$sql = "SELECT * FROM object";
 			$result = mysql_query($sql) or die(" Error in Selecting ");	
 			$myObj = new stdClass();
@@ -128,8 +127,8 @@ if(isset($_GET['type'])){
 		function getMacDetectedObject($lat,$lng){
 			$getSensor = mysql_query("SELECT * FROM cdata");
 			while($row = mysql_fetch_array($getSensor)){
-				if(abs($lat - $row['lat']) < 0.0001){
-					if(abs($lng - $row['lng']) < 0.0001){
+				if(abs($lat - $row['lat']) < 0.0002){
+					if(abs($lng - $row['lng']) < 0.0002){
 						return $row['mac'];
 					}					
 				}
@@ -165,29 +164,33 @@ if(isset($_GET['type'])){
 			$tem2 = (int)(($macTime['time'] - $tem1*3600)/60);
 			$timeTemp[0] = (int)(($timeTemp[0] + $tem1)%24);
 			$timeTemp[1] = (int)$timeTemp[1] + $tem2;
-			$timeTemp[2] = (int)$timeTemp[2] + $macTime['time'] - $tem1*3600 - $tem2*60;
-			if($timeTemp[1]>59) {
-				$timeTemp[1] = $timeTemp[1]-60;	
-				$timeTemp[0] += 1;
-			}
+			$timeTemp[2] = (int)$timeTemp[2] + $macTime['time'] - $tem1*3600 - $tem2*60;			
 			if($timeTemp[2]>59) {
 				$timeTemp[2] = $timeTemp[2]-60;	
 				$timeTemp[1] += 1;
 			}
-			$timeDoCommand = $timeTemp[0].":".$timeTemp[1].":".$timeTemp[2];
+			if($timeTemp[1] > 59) {
+				$timeTemp[1] = $timeTemp[1]-60;	
+				$timeTemp[0] += 1;
+			}
+			for($i=0;$i<3;$i++){
+				if($timeTemp[$i] < 10) $timeTemp[$i] = "0".$timeTemp[$i];
+			}
+			$timeDoCommand = $timeTemp[0].$timeTemp[1].$timeTemp[2];
 			$sql="SELECT netip FROM cdata WHERE mac='".$macTime['mac']."'";
 			$query = mysql_query($sql);
 			while($row = mysql_fetch_array($query)){
 				$network_ip = $row['netip'];
 				$speed = interpolationSpeedOneDirect($dataArray,$macTime['time']);
-				$command = "#P:".$network_ip."-".$macTime['time']."-".$speed;
+				$command = "#P:".$network_ip."-".$timeDoCommand."-".$speed;
 				mysql_query("insert into command values ('".$command."')");
-				echo "Successful";
+				echo "Sent command '$command' to Sensor ".$macTime['mac'];
 			}			
 		}
 	/////////////////////////handle request////////////////////
 	if($type == 'position'){	
 		interpolation10points($sensor,100);
+		makeCommandToTakePhoto($sensor);
 	}
 	else if($type == 'demo'){
 		$lat = 21.004806;
@@ -195,11 +198,15 @@ if(isset($_GET['type'])){
 		//if(getMacDetectedObject($lat,$lng) === NULL) echo "duong";
 		//print_r(getMacTimeRequestObject());
 		makeCommandToTakePhoto($sensor);
+		//$dem = getMacTimeRequestObject();
+		//echo "MAC:".$dem['mac'];
 	}
-	else if($type == 'speed'){
+	else if($type == 'speed'){	
+		$time = $_GET['time'];
 		echo (interpolationSpeedOneDirect($sensor,$time));
 	}
-	else if($type == 'getData'){
+	else if($type == 'getData'){	
+		$time = $_GET['time'];
 		$speed = interpolationSpeedOneDirect($sensor,$time);
 		$percent = getPercentPosition($sensor,$time,500);
 		$dataReturn = array(

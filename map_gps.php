@@ -523,6 +523,7 @@ $(document).ready(function(){
         <input onclick="clearMarkers();" type=button value="Hide Markers" class="button buttonLan">
         <input onclick="showMarkers();" type=button value="Show All Markers" class="button buttonLan">
         <input onclick="deleteMarkers();" type=button value="Delete Markers" class="button buttonLan">
+        <input onclick="makeCommand();" type=button value="MakeCommand" class="button buttonLan">
 </script>
  
 </head> 
@@ -724,6 +725,18 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 	function deleteMarkers() {
 		clearMarkers();
 		markers = [];
+	}
+	
+	function makeCommand() {
+		$.ajax({	//hien thi anh khi phat hien xam nhap
+			url: "tools/interpolation.php",                           
+			type: "GET",
+			async: false,
+			data: "type=demo",
+			success:function(req){ 
+				alert(req);
+			}	
+		});
 	}	
 	
 	function detectedObject(mac,time){
