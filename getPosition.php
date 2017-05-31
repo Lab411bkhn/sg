@@ -37,6 +37,17 @@ if(isset($_GET['table'])){
 		die (json_encode($sensor));
 		//mysql_query("DELETE FROM object");
 	}
+	else if ($table === 'velocity'){
+		$sql = "SELECT * FROM object_predicted ORDER BY time";
+		$result = mysql_query($sql) or die(" Error in Selecting ");	
+		$myObj = new stdClass();
+		$sensor = array();
+		while($row = mysql_fetch_array($result))
+		{ 
+			echo $row['speed']."<br>";
+		}
+		//mysql_query("DELETE FROM object");
+	}
 	else if ($table === 'object_predicted'){
 		$sql = "SELECT * FROM object_predicted  ORDER BY time";
 		$result = mysql_query($sql) or die(" Error in Selecting ");	

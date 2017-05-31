@@ -1,4 +1,4 @@
-<table bgcolor="#99FFCC"><tr><td><font size="+1">
+<table bgcolor="#99FFCC"><tr><td><font size="-1">
 <?php
 	require 'dbconnect.php';
 	$mac = $_GET['mac'];
@@ -26,7 +26,7 @@
 			$result = mysql_query($sql) or die(" Error in Selecting ");
     		$row =mysql_fetch_assoc($result);
 			echo $row['nameImgageLatest'];			
-		?>.jpeg" height="150px" width="200px" onclick="takePhoto()"></img></td>
+		?>.jpeg" height="90px" width="120px" onclick="takePhoto()"></img></td>
 	</tr> 
 </table>
 <script>

@@ -203,6 +203,12 @@ while( $row1 = mysql_fetch_array($query1)){
 		elseif($state_node == "03"){
      		$bantin= $bantin."Phát hiện hết năng lượng tại node: ";
      	}
+		elseif($state_node == "07"){
+     		$bantin= $bantin."Canh bao tại camera ";
+     	}
+		elseif($state_node == "06"){
+     		$bantin= $bantin."Phát hiện xâm nhập tại Camera: ";
+     	}
      	$bantin= $bantin.$mac."<br />";
      	$bantin= $bantin."Địa chỉ mạng node:".$network_ip."<br />";
      	
@@ -258,7 +264,7 @@ while( $row1 = mysql_fetch_array($query1)){
 	}
 	else {
 		$bc = 1;
-		$bantin = $bantin."Ban tin khong xac dinh: ".$result."<br>";	
+		$bantin = $bantin."Ban tin khong xac dinh: ".$row1['bantin']."<br>";	
 	}
 	
 

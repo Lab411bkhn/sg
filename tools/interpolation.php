@@ -1,7 +1,8 @@
 <?php 
 require '../dbconnect.php';
-if(isset($_GET['type'])){
-	$type = $_GET['type'];
+if(isset($_POST['type']) || isset($_GET['type'])){
+	if(isset($_POST['type'])) $type = $_POST['type'];
+	else if(isset($_GET['type'])) $type = $_GET['type'];
 	$sql = "SELECT * FROM object";
 			$result = mysql_query($sql) or die(" Error in Selecting ");	
 			$myObj = new stdClass();
@@ -78,20 +79,7 @@ if(isset($_GET['type'])){
 		}	
 		//print_r(newtonInterpolation($sensor,'lat',5));
 		
-		function interpolation10points($dataArrayInput,$number){
-			$dataArr = $dataArrayInput;
-			$sampleTime = 5;
-			mysql_query("DELETE FROM object_predicted");
-			for ($j= 0; $j<=$number; $j++){
-				$timeSampl = $sampleTime*$j;
-				$latTem = newtonInterpolation($dataArr,'lat',$timeSampl);
-				$lngTem = newtonInterpolation($dataArr,'lng',$timeSampl);
-				$my_query = "INSERT INTO object_predicted(lat, lng, time,speed) VALUE ('".$latTem."', '".$lngTem."', '".$timeSampl."', '0')";	
-				mysql_query($my_query) or die("Error in Selecting ");
-				echo($timeSampl.": Lat: ".$latTem." - Lng: ".$lngTem."<br>");
-			}    		
-		}
-		//interpolation10points($sensor,10);
+		
 		
 		function interpolationSpeedOneDirect($dataArray,$time){
 			$dataArrayIn = $dataArray;		//copy array json	
@@ -104,6 +92,21 @@ if(isset($_GET['type'])){
 			return $speedMs;
 		}	
 		
+		function interpolation10points($dataArrayInput,$number){
+			$dataArr = $dataArrayInput;
+			$sampleTime = 5;
+			mysql_query("DELETE FROM object_predicted");
+			for ($j= 0; $j<=$number; $j++){
+				$timeSampl = $sampleTime*$j;
+				$latTem = newtonInterpolation($dataArr,'lat',$timeSampl);
+				$lngTem = newtonInterpolation($dataArr,'lng',$timeSampl);
+				$speed = interpolationSpeedOneDirect($dataArr,$timeSampl);
+				$my_query = "INSERT INTO object_predicted(lat, lng, time,speed) VALUE ('".$latTem."', '".$lngTem."', '".$timeSampl."','".$speed."')";	
+				mysql_query($my_query) or die("Error in Selecting ");
+				echo($timeSampl.": Lat: ".$latTem." - Lng: ".$lngTem."<br>");
+			}    		
+		}
+		//interpolation10points($sensor,10);
 		function getPercentPosition($dataArrayInput,$time,$timeTotal){
 			$dataArr = $dataArrayInput;
 			$lat0 = newtonInterpolation($dataArr,'lat',0);
@@ -127,8 +130,8 @@ if(isset($_GET['type'])){
 		function getMacDetectedObject($lat,$lng){
 			$getSensor = mysql_query("SELECT * FROM cdata");
 			while($row = mysql_fetch_array($getSensor)){
-				if(abs($lat - $row['lat']) < 0.0002){
-					if(abs($lng - $row['lng']) < 0.0002){
+				if(abs($lat - $row['lat']) < 0.00003){
+					if(abs($lng - $row['lng']) < 0.00003){
 						return $row['mac'];
 					}					
 				}
@@ -195,15 +198,50 @@ if(isset($_GET['type'])){
 	else if($type == 'demo'){
 		$lat = 21.004806;
 		$lng =  105.844116;
-		//if(getMacDetectedObject($lat,$lng) === NULL) echo "duong";
-		//print_r(getMacTimeRequestObject());
 		makeCommandToTakePhoto($sensor);
-		//$dem = getMacTimeRequestObject();
-		//echo "MAC:".$dem['mac'];
 	}
 	else if($type == 'speed'){	
 		$time = $_GET['time'];
 		echo (interpolationSpeedOneDirect($sensor,$time));
+	}
+	else if($type == 'nodePredictedSecond'){	
+		$macTime = getMacTimeRequestObject();
+		$dataReturn = array(
+			'mac' => $macTime['mac'],
+			'time' => $macTime['time']
+		);
+		echo (json_encode($dataReturn));
+	}
+	else if($type == 'nodePredicted'){	
+		$macTime = getMacTimeRequestObject();
+		$sql0="SELECT MAX(time) FROM object";
+		$query0 = mysql_query($sql0);
+		while($row0 = mysql_fetch_array($query0)){
+			$time0 = $row0[0];
+		}	
+		$timeTemp = split("\:",$time0);
+		$tem1 = (int)($macTime['time']/3600);
+		$tem2 = (int)(($macTime['time'] - $tem1*3600)/60);
+		$timeTemp[0] = (int)(($timeTemp[0] + $tem1)%24);
+		$timeTemp[1] = (int)$timeTemp[1] + $tem2;
+		$timeTemp[2] = (int)$timeTemp[2] + $macTime['time'] - $tem1*3600 - $tem2*60;			
+		if($timeTemp[2]>59) {
+			$timeTemp[2] = $timeTemp[2]-60;	
+			$timeTemp[1] += 1;
+		}
+		if($timeTemp[1] > 59) {
+			$timeTemp[1] = $timeTemp[1]-60;	
+			$timeTemp[0] += 1;
+		}
+		for($i=0;$i<3;$i++){
+			if($timeTemp[$i] < 10) $timeTemp[$i] = "0".$timeTemp[$i];
+		}
+		$timeDoCommand = $timeTemp[0].":".$timeTemp[1].":".$timeTemp[2];
+		$dataReturn = array(
+			'mac' => $macTime['mac'],
+			'time' => $timeDoCommand
+		);
+		echo (json_encode($dataReturn));
 	}
 	else if($type == 'getData'){	
 		$time = $_GET['time'];

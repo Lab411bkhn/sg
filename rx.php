@@ -1,8 +1,11 @@
 ﻿<?php
 require 'dbconnect.php';
-if(isset($_GET['data'])) { echo $_GET['data'];
+if(isset($_POST['data']) || isset($_GET['data'])){
+	if(isset($_POST['data'])) $result = "#".$_POST['data'];
+	else if(isset($_GET['data']))$result = "#".$_GET['data'];
+	$sql2 = "INSERT INTO bantin(bantin) VALUES ('".$result."')";
+	mysql_query($sql2);
 	//$result1 = $_GET['data'];
-	$result="#".$_GET['data'];
 	/*
 	if(strpos($result1,"RS")!== false)
 	{
@@ -100,7 +103,7 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 				
 	
 	
-	if(strpos($result, "PS") !== false){ //#PS:NNNNMMVVVVVVVVVVKKKKKKKKKK
+	else if(strpos($result, "PS") !== false){ //#PS:NNNNMMVVVVVVVVVVKKKKKKKKKK
 		$mac = substr($result,8,2); //MM
 		$network_ip = substr($result,4,4);
 		$VD = substr($result,10,10);	//Vi do
@@ -127,7 +130,7 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 					}*/
 	}
 	
-	if(strpos($result,"UB")!== false)
+	else if(strpos($result,"UB")!== false)
 	{
 		//$my_query = "UPDATE cdata SET status=0 WHERE 1";
 		//mysql_query($my_query);
@@ -140,18 +143,7 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 		mysql_query($my_query);
 	}
 	
-	if(strpos($result,"RC")!= false){ //#RC:NNNNMMD1D2D3D4D5D6.....
-	?>
-			<script>
-				btnSend_Click();
-                function btnSend_Click() {
-                  var xhttp = new XMLHttpRequest();
-                  //xhttp.open("GET", "http://localhost/sg/rx.php?data=<?php echo "haiduong" ?>", true);
-				  xhttp.open("POST", "http://192.168.0.120/<?php echo "0".$_GET['data']; ?>", true);
-                  xhttp.send(); 
-                }
-            </script>
-        <?php
+	else if(strpos($result,"RC")!= false){ //#RC:NNNNMMD1D2D3D4D5D6.....
 		$network_ip = substr($result, 4, 4);// NNNN
 		$mac = substr($result, 8, 2);//MM
 		$timePhoto = substr($result, 10, 6);
@@ -184,12 +176,20 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 		if (!is_dir($path)) mkdir($path); 
 		file_put_contents($path.$nameImgageLatest.".jpeg", $binary);
 		//////////////////////////////////////////////////////////////////////
+		$url = 'http://192.168.0.103/0'.$_GET['data'];
+		//open connection
+		$ch = curl_init();
+		//set the url, number of POST vars, POST data
+		curl_setopt($ch,CURLOPT_URL,$url);		
+		//execute post
+		$result = curl_exec($ch);		
+		//close connection
+		curl_close($ch);
+	}
 		
-		}
 		
 		
-		
-	if(strpos($result,"AD:")!==false){//#AD:NNNNMMDDDDDDDDEEEE
+	else if(strpos($result,"AD:")!==false){//#AD:NNNNMMDDDDDDDDEEEE
 			$mac = substr ($result,8,2);//MM
 			$network_ip = substr ($result,4,4);//NNNN
 			$temp_16 = substr($result,10,4);
@@ -288,7 +288,7 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 					mysql_query($my_query);
 			}
 	}
-	if(strpos($result,"RD:")!==false){//#RD:NNNNMMDDDDDDDDEEEE
+	else if(strpos($result,"RD:")!==false){//#RD:NNNNMMDDDDDDDDEEEE
 		
 		$mac = substr ($result,8,2);//MM
 		$network_ip = substr ($result,4,4);//NNNN
@@ -401,168 +401,164 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 	}
 	
 	if(strpos($result,"VL:")!==false){//#VL:
-			$mac = substr($result, 4,2);
-			$sql3="SELECT * FROM cdata WHERE mac = '".$mac."'";
-			$query3= mysql_query($sql3);
-			$row_no3 = mysql_num_rows($query3);	
-			if($row_no3==0){
-				$check = 0;//Neu ko ton tai node co dia chi mang nay trong CSDL
-				//$sql="INSERT INTO data_sensor() VALUES ";
-				//$sql="";
-			}
-			else {//da ton tai dia chi mac
-				$check=1;
-				$sql="UPDATE cdata SET netip='".$network_ip."',status= '0' ";
-				mysql_query($sql);
-				$sql="INSERT INTO data_sensor(mac,netip,cat) VALUES ('".$mac."','".$network_ip."',4)";
-			}
+		$mac = substr($result, 4,2);
+		$sql3="SELECT * FROM cdata WHERE mac = '".$mac."'";
+		$query3= mysql_query($sql3);
+		$row_no3 = mysql_num_rows($query3);	
+		if($row_no3==0){
+			$check = 0;//Neu ko ton tai node co dia chi mang nay trong CSDL
+			//$sql="INSERT INTO data_sensor() VALUES ";
+			//$sql="";
+		}
+		else {//da ton tai dia chi mac
+			$check=1;
+			$sql="UPDATE cdata SET netip='".$network_ip."',status= '0' ";
+			mysql_query($sql);
+			$sql="INSERT INTO data_sensor(mac,netip,cat) VALUES ('".$mac."','".$network_ip."',4)";
+		}
 	}
 	
 	
 	
-	if(strpos($result,"OK:")!==false){//#OK:NNNNMMSS		
-			$network_ip = substr($result, 4,4);
-			$stt_16 = substr($result, 10,2);	
-			$stt_10 = base_convert($stt_16, 16, 10);
-			$mac = substr($result,8,2);
-			
-			if ($mac == '00'){
-				//map
-				$sql2 = "SELECT van_no FROM mapstt";
-				$query2 = mysql_query($sql2);
-				$row2 = mysql_fetch_array($query2);
-				$van_no = $row2['van_no'];
-				if ($van_no!='0') {
-					$sql2 = "INSERT INTO bantin_map(bt) VALUES ('".$result."')";
-					mysql_query($sql2);
+	else if(strpos($result,"OK:")!==false){//#OK:NNNNMMSS		
+		$network_ip = substr($result, 4,4);
+		$stt_16 = substr($result, 10,2);	
+		$stt_10 = base_convert($stt_16, 16, 10);
+		$mac = substr($result,8,2);
+		
+		if ($mac == '00'){
+			//map
+			$sql2 = "SELECT van_no FROM mapstt";
+			$query2 = mysql_query($sql2);
+			$row2 = mysql_fetch_array($query2);
+			$van_no = $row2['van_no'];
+			if ($van_no!='0') {
+				$sql2 = "INSERT INTO bantin_map(bt) VALUES ('".$result."')";
+				mysql_query($sql2);
+			}
+			//gateway
+			if ($stt_10 > 128){
+				$val = $stt_10 - 128;
+				if ($val == 15){
+					$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',1,now())";
+					mysql_query ($my_query);
+					$my_query1 = "UPDATE val_status SET status = 1 WHERE 1";
+					mysql_query ($my_query1);
 				}
-				//gateway
-				if ($stt_10 > 128){
-					$val = $stt_10 - 128;
-					if ($val == 15){
-						$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',1,now())";
+				else {
+					$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',1,now())";
+					mysql_query ($my_query);
+					$my_query1 = "UPDATE val_status SET status = 1 WHERE val='".$val."'";
+					mysql_query ($my_query1);
+				}
+			}
+			if (64 < $stt_10 && $stt_10 < 128){
+				
+			}
+			if ($stt_10 < 64){
+				$val = $stt_10;
+				if ($val == 15){
+						$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',0,now())";
 						mysql_query ($my_query);
-						$my_query1 = "UPDATE val_status SET status = 1 WHERE 1";
+						$my_query1 = "UPDATE val_status SET status = 0 WHERE 1";
 						mysql_query ($my_query1);
 					}
 					else {
-						$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',1,now())";
+						$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',0,now())";
 						mysql_query ($my_query);
-						$my_query1 = "UPDATE val_status SET status = 1 WHERE val='".$val."'";
+						$my_query1 = "UPDATE val_status SET status = 0 WHERE val='".$val."'";
 						mysql_query ($my_query1);
 					}
 				}
-				if (64 < $stt_10 && $stt_10 < 128){
-					
-				}
-				if ($stt_10 < 64){
-					$val = $stt_10;
-					if ($val == 15){
-							$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',0,now())";
-							mysql_query ($my_query);
-							$my_query1 = "UPDATE val_status SET status = 0 WHERE 1";
-							mysql_query ($my_query1);
-						}
-						else {
-							$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',0,now())";
-							mysql_query ($my_query);
-							$my_query1 = "UPDATE val_status SET status = 0 WHERE val='".$val."'";
-							mysql_query ($my_query1);
-						}
-					}
+		}
+		elseif ($mac == "B1"){
+			//map
+			$sql2 = "SELECT reset FROM mapstt";
+			$query2 = mysql_query($sql2);
+			$row2 = mysql_fetch_array($query2);
+			$reset = $row2['reset'];
+			if ($reset==1) {
+				$sql2 = "INSERT INTO bantin_map(bt) VALUES ('".$result."')";
+				mysql_query($sql2);
 			}
-			elseif ($mac == "B1"){
-				//map
-				$sql2 = "SELECT reset FROM mapstt";
-				$query2 = mysql_query($sql2);
-				$row2 = mysql_fetch_array($query2);
-				$reset = $row2['reset'];
-				if ($reset==1) {
-					$sql2 = "INSERT INTO bantin_map(bt) VALUES ('".$result."')";
-					mysql_query($sql2);
-				}
-				//gateway
-				$val = $stt_10 - 128;
-				$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',1,now())";
-				mysql_query ($my_query);
-				$my_query1 = "UPDATE bc_status SET level = '".$val."', netip='".$network_ip."' ";
-				mysql_query ($my_query1);
-				
-			}
+			//gateway
+			$val = $stt_10 - 128;
+			$my_query = "INSERT INTO data_val(val,actor_mac,actor_netip,status,time) VALUES ('".$val."','".$mac."','".$network_ip."',1,now())";
+			mysql_query ($my_query);
+			$my_query1 = "UPDATE bc_status SET level = '".$val."', netip='".$network_ip."' ";
+			mysql_query ($my_query1);
+			
+		}
 	}
 	
-	if(strpos($result,"SN") !== false){//#SN:NNNNMMSS  #SN:00000007
-			$mac = substr ($result,8,2);//MM
-			$network_ip = substr ($result,4,4);//NNNN
-			$state_node = substr($result,10,2);
-				
-			if($state_node == "02"){//co chay
-				//$status = "fire";
-				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),32)";
-				mysql_query ($my_query);
+	else if(strpos($result,"SN") !== false){//#SN:NNNNMMSS  #SN:00000007
+		$result2 = $result;
+		$mac = substr ($result,8,2);//MM
+		$network_ip = substr ($result,4,4);//NNNN
+		$state_node = substr($result,10,2);
+			
+		if($state_node == "02"){//co chay
+			//$status = "fire";
+			$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),32)";
+			mysql_query ($my_query);
+		}
+		elseif($state_node == "04"){//co phat hien xam nhap
+			//$status = "intrusion";
+			$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),33)";
+			mysql_query ($my_query);
+			$sql6 = "SELECT * FROM object WHERE mac = '".$mac."'";
+			$query6 = mysql_query($sql6);
+			$row_no = mysql_num_rows($query6);	
+			if($row_no==0){//
+				$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."',now())";
 			}
-			elseif($state_node == "04"){//co phat hien xam nhap
-				//$status = "intrusion";
-				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),33)";
-				mysql_query ($my_query);
-				$sql6 = "SELECT * FROM object WHERE mac = '".$mac."'";
-				$query6 = mysql_query($sql6);
-				$row_no = mysql_num_rows($query6);	
-				if($row_no==0){//
-					$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."',now())";
-				}
-				else {
-					$insertObject = "UPDATE object SET time=now() WHERE mac = '".$mac."'"; 	
-				}
-				//$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."',now())";
-				mysql_query ($insertObject);
+			else {
+				$insertObject = "UPDATE object SET time=now() WHERE mac = '".$mac."'"; 	
 			}
-			else if($state_node == "03"){//het nang luong
-				//$status = "energy";
-				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),34)";
-				mysql_query ($my_query);
+			//$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."',now())";
+			mysql_query ($insertObject);
+		}
+		else if($state_node == "03"){//het nang luong
+			//$status = "energy";
+			$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),34)";
+			mysql_query ($my_query);
+		}
+		else if($state_node == "07"){//phat hien doi tuong tu camera
+			$command = "00".$network_ip.$mac."1$";
+			mysql_query("insert into command values ('".$command."')");
+			
+		}
+		else if($state_node == "06"){//phat hien doi tuong tu anh chup #SN:NNNNMM06hhmmss
+			$hourDetected = substr($result,12,2);
+			$minDetected = substr($result,14,2);
+			$secondDetected = substr($result,16,2);
+			$timeDetected = $hourDetected.":".$minDetected.":".$secondDetected;
+			$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),33)";
+			mysql_query ($my_query);
+			$sql6 = "SELECT * FROM object WHERE mac = '".$mac."'";
+			$query6 = mysql_query($sql6);
+			$row_no = mysql_num_rows($query6);	
+			if($row_no==0){//
+				$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."','".$timeDetected."')";
 			}
-			else if($state_node == "07"){//phat hien doi tuong tu camera
-				$command = "00".$network_ip.$mac."1$";
-				mysql_query("insert into command values ('".$command."')");
-				
+			else {
+				$insertObject = "UPDATE object SET time='".$timeDetected."' WHERE mac = '".$mac."'"; 	
 			}
-			else if($state_node == "06"){//phat hien doi tuong tu anh chup #SN:NNNNMM05hhmmss
-				$hourDetected = substr($result,12,2);
-				$minDetected = substr($result,14,2);
-				$secondDetected = substr($result,16,2);
-				$timeDetected = $hourDetected.":".$minDetected.":".$secondDetected;
-				echo "HD:".$timeDetected;
-				$my_query = "INSERT INTO data_sensor(mac,netip,time,cat) VALUES ('".$mac."','".$network_ip."',now(),33)";
-				mysql_query ($my_query);
-				$sql6 = "SELECT * FROM object WHERE mac = '".$mac."'";
-				$query6 = mysql_query($sql6);
-				$row_no = mysql_num_rows($query6);	
-				if($row_no==0){//
-					$insertObject = "INSERT INTO object(mac,time) VALUES ('".$mac."','".$timeDetected."')";
-				}
-				else {
-					$insertObject = "UPDATE object SET time='".$timeDetected."' WHERE mac = '".$mac."'"; 	
-				}
-				mysql_query ($insertObject);
-				?>
-                <script type="text/javascript" src = "jquery.js"></script>
-                <script language="javascript">
-					$.ajax({
-						url: "interpolation.php",                           
-						type: "GET",
-						async: false,
-						data: "type=position&time=1",
-						success:function(req){ 
-							//do nothing here
-						}	
-					});		
-				</script>
-                <?php
-			}
+			mysql_query ($insertObject);
+			$url = 'http://localhost/sg/tools/interpolation.php?type=position';
+			//$url = 'http://localhost/sg/rx.php?data=position';
+			//open connection
+			$ch = curl_init();
+			//set the url, number of POST vars, POST data
+			curl_setopt($ch,CURLOPT_URL,$url);		
+			//execute post
+			$result = curl_exec($ch);		
+			//close connection
+			curl_close($ch);
+		}
 	}
 	
-	if(strpos($result,"RT") !== false){
+	else if(strpos($result,"RT") !== false){
 		$result = substr($result, 4);
 		$a = substr($result, 4);
 		$len = strlen($a);
@@ -576,9 +572,6 @@ if(isset($_GET['data'])) { echo $_GET['data'];
 		//$r2 = mysql_fetch_array($q2);	
 		//mysql_query("UPDATE node(src,des,bet) SET ('".$r1['mac']."','".$r2['mac']."','".$r."')");
 	}
-	
-	$sql2 = "INSERT INTO bantin(bantin) VALUES ('".$result."')";
-	mysql_query($sql2);
 	//mysql_close($connect);
 }
 ?>

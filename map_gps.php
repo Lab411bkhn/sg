@@ -518,8 +518,8 @@ $(document).ready(function(){
         </div>
       </div>
        <input  type="radio" value="GPS" name="map"  id="gps" checked="true">&nbsp;GPS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <input   type="radio" value="Vuon Lan"  name="map" id="vuonlan" >&nbsp;Vuon lan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <input  type="radio" value="Bao chay" name="map"  id="baochay">&nbsp;Bao chay
+        <input   type="radio" value="Vuon Lan"  name="map" id="vuonlan" >&nbsp;Orchids garden&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input  type="radio" value="Bao chay" name="map"  id="baochay">&nbsp;Fire warning
         <input onclick="clearMarkers();" type=button value="Hide Markers" class="button buttonLan">
         <input onclick="showMarkers();" type=button value="Show All Markers" class="button buttonLan">
         <input onclick="deleteMarkers();" type=button value="Delete Markers" class="button buttonLan">
@@ -529,7 +529,7 @@ $(document).ready(function(){
 </head> 
 <body onLoad="loadmap()">
     <div id="div_unallocated_sensor" style="height:30px; "> </div>
-    <div id="div_speed" style="height:40px; "> Toc do: </div>
+    <div id="div_speed" style="height:40px; "> Velocity: </div>
     <div id="div_map" style="height:500px; "></div>
     <div id="div_chart" style="height:200px;"></div>
     <div id="div_chart_month" style="height:200px;"></div> 
@@ -578,6 +578,7 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
         	//updateSensor();
         });
 		updateSensor();
+		
 		poly = new google.maps.Polyline({
           strokeOpacity: 1.0,
 		  strokeColor: '#FF0000',
@@ -626,15 +627,28 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
                 });
 			}	
 		});		
+		///////////////////
+		var lineSymbolObjectDetected = {
+					path: 'M 0,-1 0,1',
+					strokeOpacity: 1,
+					scale: 4
+		};
 		  /////////////////////////////////////////////////
 		  // Create the polyline and add the symbol to it via the 'icons' property.
         var line = new google.maps.Polyline({
 			path: arrayData,
 		  	strokeColor: 'blue',
+			//strokeOpacity: 0,
 			icons: [{
 				icon: lineSymbol,
-				offset: '100%'
-			  }],
+				offset: '100%',
+			}
+			/*,{
+				icon: lineSymbolObjectDetected,
+				offset: '0',
+				repeat: '20px'
+			}*/
+			],
 			map: map
         });
 		animateCircle(line);
@@ -662,9 +676,7 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 			}
 		})(marker)); 
 		
-		//marker.addListener('click', function() {
-		//	drawChart(mac,'day');	//sénsor mac ve theo ngay
-        //  	drawChartMonth(mac,'year');
+		drawChartMonth(mac,'year');
         //});
 		$.ajax({
 				url: "jsonSensor.php",                           
@@ -758,7 +770,22 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 					}	
 				});*/
 				var infowindow = new google.maps.InfoWindow({
-          			content: 'Phát hiện xâm nhập tại node ' + mac+'lúc ' + time
+          			content: 'Object seen <br>Time: ' + time
+        		});
+				infowindow.open(map, marker);
+				setTimeout(function(){  marker.setAnimation(null); }, 5000);
+			}
+		}
+	}
+	
+	function predictedNodeObjectPassThrough(mac,time){
+		//alert("MAC"+mac+":"+time);
+		for (var i = 0; i < markers.length; i++) {
+			if(markers[i]["mac"] == mac){
+				var marker = markers[i]["mark"];
+				marker.setAnimation(google.maps.Animation.BOUNCE);
+				var infowindow = new google.maps.InfoWindow({
+          			content: 'Object likely traverse here<br>Predicted time: ' + time
         		});
 				infowindow.open(map, marker);
 				setTimeout(function(){  marker.setAnimation(null); }, 5000);
@@ -786,7 +813,7 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 			success:function(req){ 
 				result = JSON.parse(req);
 				$("#div_unallocated_sensor").empty();
-				$("#div_unallocated_sensor").append('<strong>Node chưa cập nhật vị trí:</strong>');
+				$("#div_unallocated_sensor").append('<strong>Nodes have not updated position: </strong>');
 				$.each (result, function (key, item){
 					var lat = item['lat'];
 					var lng = item['lng'];
@@ -805,6 +832,12 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 				count += 1;
 				detectedObject(item['mac'],item['time']);
 			});
+			//if (count > 1) alert ("Thực hiện nội suy");
+		});
+		$.get("tools/interpolation.php","type=nodePredicted",function(data){
+			
+			result = JSON.parse(data);//alert(result.mac);
+			predictedNodeObjectPassThrough(result['mac'],result['time']);
 			//if (count > 1) alert ("Thực hiện nội suy");
 		});
 	}
@@ -926,7 +959,7 @@ var iconHiker = 'https://www.google.com/mapfiles/ms/icons/hiker.png';
 			$.get("tools/interpolation.php","type=getData&time="+time,function(data){
 				result = JSON.parse(data);
 				//alert(data);
-				document.getElementById('div_speed').innerHTML = 'Đối tượng xâm nhập Speed: ' + result.speed.toString().substring(0,5) + 'm/s <br> Kinh độ: ' + result.lat.toString().substring(0,9) + ' - Vĩ độ: '+result.lng.toString().substring(0,10);
+				document.getElementById('div_speed').innerHTML = '<strong>Warning of intruders:</strong> Velocity: ' + result.speed.toString().substring(0,5) + 'm/s <br> Lat: ' + result.lat.toString().substring(0,9) + ' - Lng: '+result.lng.toString().substring(0,10);
             	icons[0].offset = result.percent + '%';
 				//if(result.macDetected == -1) alert("Duong");
 			});

@@ -1,14 +1,8 @@
 <?php
-$xml = new SimpleXMLElement('<xml/>');
-
-for ($i = 1; $i <= 8; ++$i) {
-    $node = $xml->addChild('node');
-    $node->addChild('mac', "$i");
-    $node->addChild('time', "14:3".$i.":00");
-    $node->addChild('lat', "027.32156".$i);	
-    $node->addChild('lng', "107.32156".$i);
+require 'dbconnect.php';
+if(isset($_POST['data']) || isset($_GET['data'])){
+	if(isset($_POST['data'])) $type = $_POST['data'];
+	else if(isset($_GET['data']))$type = $_GET['data']; 
+	echo $type;
 }
-
-Header('Content-type: text/xml');
-print($xml->asXML());
 ?>
