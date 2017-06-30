@@ -4,7 +4,6 @@ $id_now = $_POST['id_now'];
 //$id_now=$_POST['id_now'];
 $bantin = "";
 $sql1="SELECT bantin FROM bantin WHERE STT='".$id_now."'";
-
 $query1 =mysql_query($sql1);
 
 while( $row1 = mysql_fetch_array($query1)){

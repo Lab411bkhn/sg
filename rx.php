@@ -176,7 +176,7 @@ if(isset($_POST['data']) || isset($_GET['data'])){
 		if (!is_dir($path)) mkdir($path); 
 		file_put_contents($path.$nameImgageLatest.".jpeg", $binary);
 		//////////////////////////////////////////////////////////////////////
-		$url = 'http://192.168.0.103/0'.$_GET['data'];
+		$url = 'http://192.168.234.129/0'.$_GET['data'];
 		//open connection
 		$ch = curl_init();
 		//set the url, number of POST vars, POST data

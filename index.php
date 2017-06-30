@@ -92,10 +92,10 @@ $(document).ready(function(){
 					divmessage.appendChild(newmsg);
 					divmessage.scrollTop = divmessage.scrollHeight;
 				}	
-				}
 			}
-		});
-	}
+		}
+	});
+}
 	
 	
 		

@@ -1,8 +1,6 @@
 <?php
-require 'dbconnect.php';
-if(isset($_POST['data']) || isset($_GET['data'])){
-	if(isset($_POST['data'])) $type = $_POST['data'];
-	else if(isset($_GET['data']))$type = $_GET['data']; 
-	echo $type;
-}
+//require 'dbconnect.php';
+//mysql_query("DELETE FROM data_sensor WHERE temp=0");
 ?>
+Duong&amp;
+&gt;
